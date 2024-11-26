@@ -1,0 +1,12 @@
+/.bundle/
+/.yardoc
+/_yardoc/
+/coverage/
+/doc/
+/pkg/
+/spec/reports/
+tmp/
+vng_storage_active_storage-*.gem
+log
+.byebug_history
+storage
