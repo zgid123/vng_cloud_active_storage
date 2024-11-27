@@ -1,5 +1,6 @@
 # frozen_string_literal: true
 
+require_relative 'vng_storage_active_storage/request_client'
 require_relative 'vng_storage_active_storage/version'
 
 module VngStorageActiveStorage

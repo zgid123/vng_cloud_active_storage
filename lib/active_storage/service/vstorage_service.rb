@@ -1,7 +1,6 @@
 # frozen_string_literal: true
 
 require 'base64'
-require 'net/http'
 require 'active_storage/service/s3_service'
 
 module ActiveStorage
@@ -38,37 +37,37 @@ module ActiveStorage
       end
 
       def temp_url(bucket, key, expires_in)
-        response = RestClient.post(
-          "https://#{region}-api.vstorage.vngcloud.vn/api/v1/projects/#{project_id}/containers/#{bucket.name}/objects/#{key}/upload_tempurls",
-          {
+        response = VngStorageActiveStorage::RequestClient.post(
+          url: "https://#{region}-api.vstorage.vngcloud.vn/api/v1/projects/#{project_id}/containers/#{bucket.name}/objects/#{key}/upload_tempurls",
+          body: {
             timeExpire: expires_in.to_i
-          }.to_json,
-          {
+          },
+          headers: {
             'Content-Type': 'application/json',
             Authorization: "Bearer #{access_token}"
           }
         )
 
-        JSON.parse(response.body).with_indifferent_access[:data][key]
+        response[:data][key]
       rescue StandardError => e
         raise VngStorageActiveStorage::Error, "Request temp url failed with error: #{e.message}"
       end
 
       def access_token
         Rails.cache.fetch("vstorage_access_token_#{project_id}", expires_in: 15.minutes) do
-          response = RestClient.post(
-            'https://iamapis.vngcloud.vn/accounts-api/v2/auth/token',
-            {
+          response = VngStorageActiveStorage::RequestClient.post(
+            url: 'https://iamapis.vngcloud.vn/accounts-api/v2/auth/token',
+            body: {
               scope: 'email',
               grant_type: 'client_credentials'
             },
-            {
+            headers: {
               'Content-Type': 'application/json',
               Authorization: "Basic #{authorization}"
             }
           )
 
-          JSON.parse(response.body).with_indifferent_access[:access_token]
+          response[:access_token]
         end
       rescue StandardError => e
         raise VngStorageActiveStorage::Error, "Request Access Token failed with error: #{e.message}"
